@@ -1,0 +1,166 @@
+TURVO CODING ASSIGNMENT - FLASH SALE WATCHKART
+================================================
+
+
+Assumptions
+------------
+
+-- Ecommerce company name WATCHKART
+-- Watch kart is singleton
+-- Time is in 24 hr format
+-- To regisger for flashsale user should be an existing user of the WATCHKART.
+-- Currency is USD
+-- Other assumptions are commented where applicable in code.
+
+
+
+
+How to launch the application and other code details:
+-------------------------------------------------------
+http://localhost:9090
+
+-- The application is a Spring Boot Maven application.
+-- To run the application locally we just have to import the project as maven project after unzip.
+-- Then run the Class WristwatchApplication.java as JavaApplication.
+-- Once the application is launched we should see message in log like "Started WristwatchApplication in 24.952 seconds (JVM running for 27.394)"
+-- Now our application is up and the APIs are exposed using REST webservice. http://localhost:9090
+-- Below are the details of url and request and response.
+-- Use Postman application to hit the endpoint url mentioned below with requests.
+-- service package contains five services
+         FlashSaleBrowserService
+         FlashSalePurchaseService
+         FlashSaleRegistrationService
+         PeekWatchKartService
+         WatchKartDaoService
+-- request and response package contains Request and Response for above services.
+-- model package contains all Model Entities.
+-- exception package contains user defined application application.
+-- util package contains util class.
+-- resources --> static folder contains notes.txt with details of the code.
+-- resource --> templates folder contains request json for all exposed services.
+
+
+
+Use Cases, REST API EndPoint details
+--------------------------------------
+
+note : watchkart is pre loaded with 3 users(1 admin, 2 normal) and some watch details
+
+1) admin user tries to peek the watch kart
+http://localhost:9090/peekwatchkart
+request - {"userId":"71807Irfan"}
+response - entire watchkart preloaded with some data.
+
+2) non admin user tries to peek kart
+http://localhost:9090/peekwatchkart
+request - {"userId":"64566Salman"}
+response - error message saying only admin can see the watch kart.
+
+3) a non existent user (invalid userid) tries to peek the watchkart.
+http://localhost:9090/peekwatchkart
+request - {"userId":"dummyid"}
+response - error message saying this user does not exist.
+
+4) no user registered yet for flashsale yet, a user tries to browse watches for flashsale.
+http://localhost:9090/browseFlashSale
+request - {
+          	"flashSaleId": "BLKFRI",
+          	"userId": "64566Salman"
+          }
+response - error message saying currently no user has registered for the flash sale.
+
+5) a user tries to register for a flash sale.
+request - {
+          	"flashSaleId": "BLKFRI",
+          	"userId": "654231Rahul"
+          }
+
+response - success message saying user successfully registered for the flash sale.
+
+6) after registration for flash sale user tries to browse the flash sale watches.
+
+request - {
+          	"flashSaleId": "BLKFRI",
+          	"userId": "654231Rahul"
+          }
+
+response - should display the flash sales watches, as shown below
+{
+   "res": "SUCCESS",
+   "message": "Watches on Flash Sales are found successfully.",
+   "watches":    [
+            {
+         "watchId": "rolex001",
+         "brand": "Rolex",
+         "price": 1000,
+         "stockAvailable": 275
+      },
+            {
+         "watchId": "gshock001",
+         "brand": "GShock",
+         "price": 400,
+         "stockAvailable": 275
+      }
+   ]
+}
+
+7) Now a user who has not registerd for flashsale trying to browse the flash sale watches.
+
+request - {
+          	"flashSaleId": "BLKFRI",
+          	"userId": "64566Salman"
+          }
+
+response - failure message should be displayed, as shown below
+
+{
+   "res": "FAILURE",
+   "message": "User: 64566Salman has not registered yet for the flashsale: BLKFRI",
+   "watches": null
+}
+
+8) After the user has registered for a flash sale, now user is trying to purchase one/multiple of the watch from flash sales.
+
+http://localhost:9090/purchaseWatch
+
+request - {
+            "flashSaleId": "BLKFRI",
+            "userId": "654231Rahul",
+            "watchesWithQty": [
+              {
+                "watchId": "rolex001",
+                "quantity": 2
+              },
+              {
+                "watchId": "timex001",
+                "quantity": 4
+              }
+            ]
+          }
+
+
+response -
+
+{
+   "res": "SUCCESS",
+   "message": "Order places successfully.",
+   "purchaseOrder":    {
+      "orderId": "654231Rahul1550794353818",
+      "userId": "654231Rahul",
+      "cart":       {
+         "cartEntries": [         {
+            "watch":             {
+               "watchId": "rolex001",
+               "brand": "Rolex",
+               "price": 1000,
+               "stockAvailable": 275
+            },
+            "quantity": 2,
+            "cartEntryAmount": 2000
+         }],
+         "cartAmount": 2100
+      },
+      "orderStatus": "INITIATED",
+      "orderBillingAmount": 2100
+   }
+}
